@@ -25,7 +25,7 @@ from sklearn.decomposition import PCA
 
 
 # 读取数据
-mydata = pd.read_csv("data.csv")
+mydata = pd.read_csv("D:\\Intro to Machine Learning\\Bankrupt-Prediction\\data.csv")
 
 # 按照Bankrupt值排序，把所有的破产的样本放到mydata的最后几行
 mydata.sort_values(by='Bankrupt?',inplace=True)
@@ -49,6 +49,8 @@ scaler = StandardScaler()
 scaler.fit(X)
 X_train = scaler.transform(X_train)
 X_test = scaler.transform(X_test)
+
+METHOD = 'Rforest'
 
 
 # 训练模型的函数，输入训练集和测试集，以及使用的机器学习方法method（一个字符串）
@@ -93,7 +95,7 @@ def train_model(X_train, y_train, X_test, y_test, method):
 print("方法一：feature importance法")
 
 # 这里我训练的是随机森林模型，可以更换为决策树或者梯度提升模型
-model = train_model(X_train, y_train, X_test, y_test,'Rforest')
+model = train_model(X_train, y_train, X_test, y_test, METHOD)
 y_test_pred = model.predict(X_test)
 before_acc = accuracy_score(y_test, y_test_pred)
 before_precision, before_recall, before_F1, _ = precision_recall_fscore_support(y_test, y_test_pred, average="binary")
@@ -116,10 +118,11 @@ indices = np.argsort(importances)[::-1]
 num_features = 20
 picked_idx = indices[0:num_features]
 plt.figure()
-plt.title("Most Important 20 Features")
+plt.title("Most Important 20 Features By " + METHOD)
 plt.bar(range(num_features), importances[picked_idx], color="g", align="center")
-plt.xticks(range(num_features), [features[i] for i in picked_idx] , rotation='90')
-#plt.xticks(range(num_features), picked_idx, rotation='0')
+
+# plt.xticks(range(num_features), [features[i] for i in picked_idx] , rotation='90')
+plt.xticks(range(num_features), picked_idx, rotation='0')
 plt.xlim([-1, num_features])
 plt.show()
 
@@ -135,7 +138,7 @@ X1_test = scaler.transform(X1_test)
 
 
 # 重训模型
-new_model1 = train_model(X1_train, y1_train, X1_test, y1_test,'Rforest')
+new_model1 = train_model(X1_train, y1_train, X1_test, y1_test, METHOD)
 y1_test_pred = new_model1.predict(X1_test)
 after_acc = accuracy_score(y1_test, y1_test_pred)
 after_precision, after_recall, after_F1, _ = precision_recall_fscore_support(y1_test, y1_test_pred, average="binary")
@@ -150,11 +153,14 @@ labels = ["accuracy", "precision", "recall", "F1"]
 fig,ax = plt.subplots(figsize=(8,5),dpi=80)
 width_1 = 0.4
 ax.bar(np.arange(len(before)),before,width=width_1,tick_label=labels,label = "before")
+for x, y in enumerate(before):
+    plt.text(x - 0.1, y, "{0:.2f}".format(y))
 ax.bar(np.arange(len(after))+width_1,after,width=width_1,tick_label=labels,label="after")
+for x, y in enumerate(after):
+    plt.text(x + 0.3, y, "{0:.2f}".format(y))
 ax.legend()
-ax.set_title('Comparing Model before and after using Feature_Importance method')
+ax.set_title('Comparing Model before and after using Feature_Importance method ({})'.format(METHOD))
 plt.show()
-
 
 
 # --------------------------------- 方法二： PCA主成分分析 ---------------------------------------
@@ -162,7 +168,7 @@ plt.show()
 print("方法二： PCA主成分分析法")
 
 # 特征工程之前的模型，以随机森林为例
-model = train_model(X_train, y_train, X_test, y_test,'Rforest')
+model = train_model(X_train, y_train, X_test, y_test, METHOD)
 y_test_pred = model.predict(X_test)
 before_acc = accuracy_score(y_test, y_test_pred)
 before_precision, before_recall, before_F1, _ = precision_recall_fscore_support(y_test, y_test_pred, average="binary")
@@ -186,7 +192,7 @@ X_train_pca= scaler.transform(X_train_pca)
 X_test_pca = scaler.transform(X_test_pca)
 
 # 训练新的模型
-new_model2 = train_model(X_train_pca, y2_train, X_test_pca, y2_test,'Rforest')
+new_model2 = train_model(X_train_pca, y2_train, X_test_pca, y2_test, METHOD)
 y2_test_pred = new_model2.predict(X_test_pca)
 after_acc = accuracy_score(y2_test, y2_test_pred)
 after_precision, after_recall, after_F1, _ = precision_recall_fscore_support(y2_test, y2_test_pred, average="binary")
@@ -201,11 +207,14 @@ labels = ["accuracy", "precision", "recall", "F1"]
 fig,ax = plt.subplots(figsize=(8,5),dpi=80)
 width_1 = 0.4
 ax.bar(np.arange(len(before)),before,width=width_1,tick_label=labels,label = "before")
+for x, y in enumerate(before):
+    plt.text(x - 0.1, y, "{0:.2f}".format(y))
 ax.bar(np.arange(len(after))+width_1,after,width=width_1,tick_label=labels,label="after")
+for x, y in enumerate(after):
+    plt.text(x + 0.3, y, "{0:.2f}".format(y))
 ax.legend()
-ax.set_title('Comparing Model before and after using PCA method')
+ax.set_title('Comparing Model before and after using PCA method ({})'.format(METHOD))
 plt.show()
-
 
 
 # --------------------------------- 方法三：基于特征本身经济学意义的特征工程 ---------------------------------------
@@ -248,7 +257,7 @@ picked_idx = [1,3,12,13,16,18,31,32,35,36,94,41,42,92]
 picked_features = [features[i] for i in picked_idx]
 
 # 特征工程之前的模型，以随机森林为例
-model = train_model(X_train, y_train, X_test, y_test,'Rforest')
+model = train_model(X_train, y_train, X_test, y_test, METHOD)
 y_test_pred = model.predict(X_test)
 before_acc = accuracy_score(y_test, y_test_pred)
 before_precision, before_recall, before_F1, _ = precision_recall_fscore_support(y_test, y_test_pred, average="binary")
@@ -266,7 +275,7 @@ X3_train = scaler.transform(X3_train)
 X3_test = scaler.transform(X3_test)
 
 # 训练新的模型
-new_model3 = train_model(X3_train, y3_train, X3_test, y3_test,'Rforest')
+new_model3 = train_model(X3_train, y3_train, X3_test, y3_test, METHOD)
 y3_test_pred = new_model3.predict(X3_test)
 after_acc = accuracy_score(y3_test, y3_test_pred)
 after_precision, after_recall, after_F1, _ = precision_recall_fscore_support(y3_test, y3_test_pred, average="binary")
@@ -281,7 +290,11 @@ labels = ["accuracy", "precision", "recall", "F1"]
 fig,ax = plt.subplots(figsize=(8,5),dpi=80)
 width_1 = 0.4
 ax.bar(np.arange(len(before)),before,width=width_1,tick_label=labels,label = "before")
+for x, y in enumerate(before):
+    plt.text(x - 0.1, y, "{0:.2f}".format(y))
 ax.bar(np.arange(len(after))+width_1,after,width=width_1,tick_label=labels,label="after")
+for x, y in enumerate(after):
+    plt.text(x + 0.3, y, "{0:.2f}".format(y))
 ax.legend()
-ax.set_title('Comparing Model before and after using economic method')
+ax.set_title('Comparing Model before and after using Economical method ({})'.format(METHOD))
 plt.show()
