@@ -1,4 +1,6 @@
-# 特征工程代码 by 张柏舟
+# Author: 张柏舟 
+
+# 特征工程代码
 # 尝试使用三种方法：
 # (1) 调用feature_importance函数(Gini_Importance)，选取前20个最重要的feature重新训练
 # (2) 使用PCA主成分分析法
@@ -9,7 +11,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-import mglearn
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 from sklearn.metrics import f1_score
 from sklearn.model_selection import train_test_split

@@ -1,4 +1,6 @@
-# 首先用ADASYN处理数据不平衡的问题，然后构造了一个三层的全连接神经网络，由于二分类问题本身不复杂，epoch=50时准确率就能收敛到99%
+# Author: 鲁琦琨
+
+# 构造了一个三层的全连接神经网络，由于二分类问题本身不复杂，epoch=50时准确率就能收敛到99%
 import pandas as pd
 import torch
 import numpy as np
@@ -10,13 +12,13 @@ from sklearn.preprocessing import StandardScaler
 from imblearn.over_sampling import ADASYN
 from sklearn.metrics import classification_report
 
-company = pd.read_csv('data.csv')
+company = pd.read_csv('D:\\Intro to Machine Learning\\Bankrupt-Prediction\\data.csv')
 
-# 使用ADASYN解决数据不平衡的问题
+
 p = 1-(len(company[company['Bankrupt?']==1])/len(company))
 X = company.drop('Bankrupt?', axis = 1).reset_index(drop = True)
 y = company['Bankrupt?'].reset_index(drop = True)
-X_resample, y_resample = ADASYN().fit_resample(X,y)
+X_resample, y_resample = X, y # ADASYN().fit_resample(X, y) 使用ADASYN解决数据不平衡的问题，作为对照组暂不采用
 
 # 预处理数据
 c = X_resample.columns
@@ -95,6 +97,8 @@ for i in range(epochs):
     train_loop(train_dataloader, model, loss_fn, optimizer)
     test_loop(test_dataloader, model, loss_fn)
 ax.plot(accs)
+plt.xlabel('epoch')
+plt.ylabel('accuracy')
 plt.show()
 
 
